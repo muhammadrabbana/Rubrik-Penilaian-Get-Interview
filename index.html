@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Rubrik Penilaian Get Interview Digital - Divisi PSDM HMTP. Hitung skor evaluasi mahasiswa aktif secara real-time dan simpan laporan PDF.">
+  <title>Rubrik Penilaian Get Interview - HMTP</title>
+  
+  <!-- Google Fonts: Plus Jakarta Sans for premium typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ----------------------------------------------------
+       1. DESIGN SYSTEM & CSS VARIABLES
+       ---------------------------------------------------- */
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
+      --primary-rgb: 37, 99, 235;
+      
+      --neutral-50: #f8fafc;
+      --neutral-100: #f1f5f9;
+      --neutral-200: #e2e8f0;
+      --neutral-300: #cbd5e1;
+      --neutral-700: #334155;
+      --neutral-800: #1e293b;
+      --neutral-900: #0f172a;
+      
+      --success: #10b981;
+      --success-light: #ecfdf5;
+      --success-rgb: 16, 185, 129;
+      
+      --warning: #f59e0b;
+      --warning-light: #fffbeb;
+      --warning-rgb: 245, 158, 11;
+      
+      --danger: #ef4444;
+      --danger-light: #fef2f2;
+      --danger-rgb: 239, 68, 68;
+
+      --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --radius-sm: 0.375rem;
+      --radius-md: 0.75rem;
+      --radius-lg: 1.25rem;
+      --radius-full: 9999px;
+
+      --transition-fast: 0.15s ease;
+      --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      --shadow-premium: 0 20px 40px -15px rgba(15, 23, 42, 0.06);
+
+      --current-status-color: var(--warning);
+      --current-status-bg: var(--warning-light);
+    }
+
+    /* ----------------------------------------------------
+       2. RESET & BASE STYLES
+       ---------------------------------------------------- */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--neutral-50);
+      color: var(--neutral-800);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Decorative Background Shapes */
+    body::before {
+      content: '';
+      position: absolute;
+      top: -300px;
+      left: -200px;
+      width: 600px;
+      height: 600px;
+      border-radius: var(--radius-full);
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
+      z-index: -1;
+    }
+
+    body::after {
+      content: '';
+      position: absolute;
+      bottom: -200px;
+      right: -200px;
+      width: 500px;
+      height: 500px;
+      border-radius: var(--radius-full);
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
+      z-index: -1;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      flex: 1;
+    }
+
+    /* ----------------------------------------------------
+       3. TYPOGRAPHY & HEADER
+       ---------------------------------------------------- */
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .org-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--primary-light);
+      color: var(--primary);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+      border: 1px solid rgba(37, 99, 235, 0.1);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .org-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 3;
+    }
+
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--neutral-900);
+      letter-spacing: -0.03em;
+      line-height: 1.25;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--neutral-700);
+      font-weight: 500;
+    }
+
+    /* ----------------------------------------------------
+       4. CARD & GRID LAYOUT
+       ---------------------------------------------------- */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--neutral-200);
+      box-shadow: var(--shadow-premium);
+      overflow: hidden;
+      transition: var(--transition-normal);
+    }
+
+    .card-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--neutral-100);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .card-header-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background-color: var(--primary-light);
+      color: var(--primary);
+      border-radius: var(--radius-md);
+    }
+
+    .card-header-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--neutral-900);
+    }
+
+    .card-body {
+      padding: 2rem;
+    }
+
+    /* ----------------------------------------------------
+       5. INPUTS & FORM FIELDS
+       ---------------------------------------------------- */
+    .form-group-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .form-group-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-control {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--neutral-700);
+    }
+
+    input[type="text"] {
+      font-family: var(--font-main);
+      font-size: 0.95rem;
+      font-weight: 500;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--neutral-200);
+      background-color: var(--neutral-50);
+      color: var(--neutral-900);
+      outline: none;
+      transition: var(--transition-fast);
+      width: 100%;
+    }
+
+    input[type="text"]::placeholder {
+      color: var(--neutral-300);
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary);
+      background-color: #fff;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+    /* ----------------------------------------------------
+       6. SLIDERS & RUBRICS
+       ---------------------------------------------------- */
+    .rubric-section {
+      margin-top: 2rem;
+    }
+
+    .rubric-header {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--neutral-900);
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 2px solid var(--neutral-100);
+      padding-bottom: 0.5rem;
+    }
+
+    .rubric-header svg {
+      width: 20px;
+      height: 20px;
+      color: var(--primary);
+    }
+
+    .slider-container {
+      margin-bottom: 1.5rem;
+      background-color: var(--neutral-50);
+      padding: 1.25rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--neutral-200);
+      transition: var(--transition-normal);
+    }
+
+    .slider-container:hover {
+      border-color: var(--neutral-300);
+      box-shadow: var(--shadow-sm);
+      transform: translateY(-1px);
+    }
+
+    .slider-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+
+    .slider-label-block {
+      max-width: 80%;
+    }
+
+    .slider-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--neutral-800);
+      margin-bottom: 0.25rem;
+    }
+
+    .slider-desc {
+      font-size: 0.8rem;
+      color: var(--neutral-700);
+      line-height: 1.4;
+    }
+
+    .slider-badge {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--primary);
+      background-color: var(--primary-light);
+      padding: 0.25rem 0.75rem;
+      border-radius: var(--radius-md);
+      min-width: 55px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid rgba(37, 99, 235, 0.08);
+      font-variant-numeric: tabular-nums;
+      transition: color var(--transition-normal), background-color var(--transition-normal);
+    }
+
+    .range-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 8px;
+      border-radius: var(--radius-full);
+      background: var(--neutral-200);
+      outline: none;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    /* Custom Webkit Thumb */
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: var(--radius-full);
+      background: #ffffff;
+      border: 3px solid var(--primary);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15), 0 0 0 0px rgba(37, 99, 235, 0.15);
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.15s ease, border-color var(--transition-normal);
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15), 0 0 0 6px rgba(37, 99, 235, 0.15);
+    }
+
+    input[type="range"]::-webkit-slider-thumb:active {
+      transform: scale(1.1);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 0 10px rgba(37, 99, 235, 0.25);
+    }
+
+    /* Custom Firefox Thumb */
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: var(--radius-full);
+      background: #ffffff;
+      border: 3px solid var(--primary);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.15s ease, border-color var(--transition-normal);
+    }
+
+    input[type="range"]::-moz-range-thumb:hover {
+      transform: scale(1.15);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15), 0 0 0 6px rgba(37, 99, 235, 0.15);
+    }
+
+    /* ----------------------------------------------------
+       7. RESULT DASHBOARD (RIGHT PANEL)
+       ---------------------------------------------------- */
+    .result-panel {
+      position: sticky;
+      top: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .result-card {
+      text-align: center;
+      padding: 2.5rem 2rem;
+      position: relative;
+      border: 1px solid var(--neutral-200);
+      transition: box-shadow var(--transition-normal), border-color var(--transition-normal);
+      box-shadow: 0 20px 40px -15px rgba(var(--current-status-rgb), 0.15), var(--shadow-premium);
+    }
+
+    .result-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background-color: var(--current-status-color);
+      transition: background-color var(--transition-normal);
+    }
+
+    .result-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--neutral-700);
+      margin-bottom: 1.5rem;
+    }
+
+    /* Circular Score Progress Indicator */
+    .score-circle-wrapper {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      margin: 0 auto 2rem;
+    }
+
+    .score-svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .score-circle-bg {
+      fill: none;
+      stroke: var(--neutral-100);
+      stroke-width: 10;
+    }
+
+    .score-circle-fill {
+      fill: none;
+      stroke: var(--current-status-color);
+      stroke-width: 10;
+      stroke-linecap: round;
+      stroke-dasharray: 502;
+      stroke-dashoffset: 502;
+      transition: stroke-dashoffset 0.5s cubic-bezier(0.4, 0, 0.2, 1), stroke var(--transition-normal);
+    }
+
+    .score-text-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .score-val {
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--neutral-900);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .score-max {
+      font-size: 0.8rem;
+      color: var(--neutral-700);
+      font-weight: 600;
+      margin-top: 0.25rem;
+    }
+
+    /* Status Badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius-md);
+      font-weight: 800;
+      font-size: 0.95rem;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      background-color: var(--current-status-bg);
+      color: var(--current-status-color);
+      border: 1.5px solid rgba(var(--current-status-rgb), 0.15);
+      transition: all var(--transition-normal);
+      width: 100%;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .status-badge svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Interactive tips based on assessment score */
+    .evaluation-tips {
+      background-color: var(--neutral-50);
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      text-align: left;
+      margin-top: 1.5rem;
+    }
+
+    .tips-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--neutral-800);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .tips-title svg {
+      width: 16px;
+      height: 16px;
+      color: var(--primary);
+    }
+
+    .tips-content {
+      font-size: 0.8rem;
+      color: var(--neutral-700);
+      line-height: 1.5;
+    }
+
+    /* ----------------------------------------------------
+       8. BUTTONS & ACTIONS
+       ---------------------------------------------------- */
+    .actions-card {
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      font-family: var(--font-main);
+      font-size: 0.95rem;
+      font-weight: 700;
+      padding: 0.85rem 1.5rem;
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      transition: var(--transition-normal);
+      width: 100%;
+      outline: none;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+      transform: translateY(-1.5px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(-0.5px);
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      color: var(--neutral-700);
+      border: 1.5px solid var(--neutral-300);
+    }
+
+    .btn-outline:hover {
+      background-color: var(--neutral-100);
+      color: var(--neutral-900);
+      border-color: var(--neutral-700);
+    }
+
+    .btn svg {
+      width: 18px;
+      height: 18px;
+      transition: transform 0.2s ease;
+    }
+
+    .btn-primary:hover svg {
+      transform: translateY(-1px);
+    }
+
+    /* ----------------------------------------------------
+       9. RESPONSIVENESS
+       ---------------------------------------------------- */
+    @media (max-width: 1024px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .result-panel {
+        position: static;
+      }
+    }
+
+    /* Print helper classes */
+    .print-only {
+      display: none;
+    }
+
+    /* ----------------------------------------------------
+       10. PRINT MEDIA RULES (@media print)
+       ---------------------------------------------------- */
+    @media print {
+      body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        font-size: 11pt !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      body::before, body::after {
+        display: none !important;
+      }
+
+      .container {
+        padding: 0 !important;
+        max-width: 100% !important;
+      }
+
+      header {
+        margin-bottom: 2rem !important;
+        border-bottom: 2px solid #000000;
+        padding-bottom: 1rem;
+      }
+
+      .org-badge {
+        border: none !important;
+        background: transparent !important;
+        color: #000000 !important;
+        padding: 0 !important;
+        font-size: 10pt !important;
+        margin-bottom: 0.25rem !important;
+      }
+      
+      .org-badge svg {
+        display: none !important;
+      }
+
+      h1 {
+        font-size: 18pt !important;
+        margin-bottom: 0.25rem !important;
+      }
+
+      .subtitle {
+        font-size: 10pt !important;
+        color: #333333 !important;
+      }
+
+      .dashboard-grid {
+        display: block !important;
+      }
+
+      .card {
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        margin-bottom: 1.5rem !important;
+        overflow: visible !important;
+      }
+
+      .card-header {
+        padding: 0.5rem 0 !important;
+        border-bottom: 1.5px solid #000000 !important;
+        margin-bottom: 1rem;
+      }
+
+      .card-header-icon {
+        display: none !important;
+      }
+
+      .card-title {
+        font-size: 12pt !important;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .card-body {
+        padding: 0 !important;
+      }
+
+      .form-group-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 1rem !important;
+        margin-bottom: 1rem !important;
+      }
+
+      .form-control {
+        flex-direction: row !important;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      label {
+        font-size: 10pt !important;
+        color: #000000 !important;
+        min-width: 100px;
+      }
+
+      label::after {
+        content: " :";
+      }
+
+      input[type="text"] {
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        font-size: 10pt !important;
+        font-weight: 700 !important;
+        color: #000000 !important;
+        box-shadow: none !important;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+      }
+
+      .slider-container {
+        background: transparent !important;
+        border: none !important;
+        border-bottom: 1px dashed #cccccc !important;
+        border-radius: 0 !important;
+        padding: 0.5rem 0 !important;
+        margin-bottom: 0.5rem !important;
+      }
+
+      .slider-info {
+        margin-bottom: 0.5rem !important;
+        align-items: center;
+      }
+
+      .slider-title {
+        font-size: 10pt !important;
+      }
+
+      .slider-desc {
+        font-size: 8.5pt !important;
+        color: #555555 !important;
+      }
+
+      .slider-badge {
+        font-size: 11pt !important;
+        font-weight: 700 !important;
+        background: transparent !important;
+        border: none !important;
+        color: #000000 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+      }
+
+      /* Keep range tracks visible but strictly hide the thumbs during printing */
+      input[type="range"] {
+        pointer-events: none !important;
+        background: var(--neutral-200) !important;
+      }
+      
+      input[type="range"]::-webkit-slider-thumb {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+      }
+
+      input[type="range"]::-moz-range-thumb {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+
+      .result-panel {
+        display: block !important;
+        margin-top: 1.5rem;
+        page-break-inside: avoid;
+      }
+
+      .result-card {
+        border: 2px solid #000000 !important;
+        border-radius: 4px !important;
+        padding: 1.5rem !important;
+        box-shadow: none !important;
+      }
+
+      .result-card::before {
+        display: none !important;
+      }
+
+      .result-title {
+        font-size: 11pt !important;
+        margin-bottom: 1rem !important;
+      }
+
+      .score-circle-wrapper {
+        display: none !important;
+      }
+
+      .print-score-display {
+        display: block !important;
+        font-size: 24pt !important;
+        font-weight: 800;
+        margin: 0.5rem 0;
+        color: #000000 !important;
+      }
+
+      .status-badge {
+        border: 2px solid #000000 !important;
+        background: transparent !important;
+        color: #000000 !important;
+        padding: 0.5rem !important;
+        font-size: 12pt !important;
+        font-weight: 800 !important;
+        box-shadow: none !important;
+        border-radius: 4px !important;
+      }
+
+      .status-badge svg {
+        display: none !important;
+      }
+
+      .evaluation-tips {
+        background: transparent !important;
+        border: 1px solid #cccccc !important;
+        padding: 0.75rem !important;
+        margin-top: 1rem !important;
+      }
+
+      .tips-title {
+        font-size: 9pt !important;
+      }
+
+      .tips-title svg {
+        display: none !important;
+      }
+
+      .tips-content {
+        font-size: 8.5pt !important;
+      }
+
+      .no-print, .actions-card {
+        display: none !important;
+      }
+
+      .print-only.print-sign-off {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        margin-top: 3rem;
+        text-align: center;
+        page-break-inside: avoid;
+      }
+
+      .signature-box {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 120px;
+      }
+
+      .sig-line {
+        border-bottom: 1.5px solid #000000;
+        width: 70%;
+        margin: 0 auto;
+      }
+
+      .sig-date {
+        font-size: 9pt;
+        color: #333333;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- HEADER -->
+    <header>
+      <div class="org-badge">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+        Divisi PSDM - HMTP
+      </div>
+      <h1>Rubrik Penilaian Get Interview</h1>
+      <p class="subtitle">Sasaran: Mahasiswa Aktif Teknik Perpipaan | Divisi PSDM - HMTP</p>
+    </header>
+
+    <!-- CONTENT GRID -->
+    <div class="dashboard-grid">
+      
+      <!-- LEFT SECTION: INFO & SLIDERS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </div>
+          <div class="card-title">Profil & Rubrik Penilaian</div>
+        </div>
+
+        <div class="card-body">
+          <!-- Candidate Information Form -->
+          <div class="form-group-grid">
+            <div class="form-control">
+              <label for="candidate-name">Nama Mahasiswa</label>
+              <input type="text" id="candidate-name" placeholder="Nama Lengkap...">
+            </div>
+            
+            <div class="form-control">
+              <label for="candidate-nrp">NRP</label>
+              <input type="text" id="candidate-nrp" placeholder="misal: 052... (NRP Lengkap)">
+            </div>
+
+            <div class="form-control">
+              <label for="candidate-class">Kelas</label>
+              <input type="text" id="candidate-class" placeholder="misal: TP 4A...">
+            </div>
+          </div>
+
+          <!-- Assessment Rubrics -->
+          <div class="rubric-section">
+            <div class="rubric-header">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+              </svg>
+              Kriteria Penilaian (Skala 1 - 100)
+            </div>
+
+            <!-- Criterion 1 -->
+            <div class="slider-container">
+              <div class="slider-info">
+                <div class="slider-label-block">
+                  <div class="slider-title">CV Peserta</div>
+                  <div class="slider-desc">Kerapihan dokumen, tata letak, kejelasan deskripsi pengalaman, keselarasan format, serta relevansi isi CV.</div>
+                </div>
+                <div class="slider-badge" id="val-badge-c1">50</div>
+              </div>
+              <div class="range-wrapper">
+                <input type="range" id="c1" min="1" max="100" value="50" oninput="calculateResult()">
+              </div>
+            </div>
+
+            <!-- Criterion 2 -->
+            <div class="slider-container">
+              <div class="slider-info">
+                <div class="slider-label-block">
+                  <div class="slider-title">Komunikasi</div>
+                  <div class="slider-desc">(Penyampaian ide dengan jelas, pendengar aktif, respon terhadap pertanyaan)</div>
+                </div>
+                <div class="slider-badge" id="val-badge-c2">50</div>
+              </div>
+              <div class="range-wrapper">
+                <input type="range" id="c2" min="1" max="100" value="50" oninput="calculateResult()">
+              </div>
+            </div>
+
+            <!-- Criterion 3 -->
+            <div class="slider-container">
+              <div class="slider-info">
+                <div class="slider-label-block">
+                  <div class="slider-title">Kepercayaan Diri</div>
+                  <div class="slider-desc">(Penyampaian yang lugas, keyakinan saat menjawab pertanyaan)</div>
+                </div>
+                <div class="slider-badge" id="val-badge-c3">50</div>
+              </div>
+              <div class="range-wrapper">
+                <input type="range" id="c3" min="1" max="100" value="50" oninput="calculateResult()">
+              </div>
+            </div>
+
+            <!-- Criterion 4 -->
+            <div class="slider-container">
+              <div class="slider-info">
+                <div class="slider-label-block">
+                  <div class="slider-title">Etika</div>
+                  <div class="slider-desc">(Kesopanan peserta, duduk rapi, berbahasa baku)</div>
+                </div>
+                <div class="slider-badge" id="val-badge-c4">50</div>
+              </div>
+              <div class="range-wrapper">
+                <input type="range" id="c4" min="1" max="100" value="50" oninput="calculateResult()">
+              </div>
+            </div>
+
+            <!-- Criterion 5 -->
+            <div class="slider-container">
+              <div class="slider-info">
+                <div class="slider-label-block">
+                  <div class="slider-title">Kesiapan</div>
+                  <div class="slider-desc">(Peserta paham terhadap CV yang dibawakan)</div>
+                </div>
+                <div class="slider-badge" id="val-badge-c5">50</div>
+              </div>
+              <div class="range-wrapper">
+                <input type="range" id="c5" min="1" max="100" value="50" oninput="calculateResult()">
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT SECTION: DYNAMIC LIVE SCORE & ACTIONS -->
+      <div class="result-panel">
+        
+        <!-- Score Card Dashboard -->
+        <div class="card result-card" id="result-score-card">
+          <div class="result-title">Hasil Evaluasi Akhir</div>
+          
+          <!-- Printing plain text fallback for score -->
+          <div class="print-only print-score-display" id="print-score-text">50.00</div>
+
+          <!-- Circular gauge on screen -->
+          <div class="score-circle-wrapper">
+            <svg class="score-svg" viewBox="0 0 180 180">
+              <circle class="score-circle-bg" cx="90" cy="90" r="80"></circle>
+              <circle class="score-circle-fill" id="score-circle-fill" cx="90" cy="90" r="80"></circle>
+            </svg>
+            <div class="score-text-container">
+              <span class="score-val" id="total-score-display">50.0</span>
+              <span class="score-max">Skor Rata-Rata</span>
+            </div>
+          </div>
+
+          <!-- Status badge with text and dynamic icon -->
+          <div class="status-badge" id="status-badge">
+            <svg id="badge-icon-rec" class="print-only" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <svg id="badge-icon-consider" class="print-only" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <svg id="badge-icon-reject" class="print-only" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span id="status-text">DIPERTIMBANGKAN</span>
+          </div>
+
+          <!-- Evaluator Tips -->
+          <div class="evaluation-tips">
+            <div class="tips-title">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Panduan Rekomendasi
+            </div>
+            <p class="tips-content" id="tips-text">
+              Kandidat menunjukkan kapasitas menengah. Silakan periksa kembali beberapa kriteria penting untuk kesiapan profesi.
+            </p>
+          </div>
+        </div>
+
+        <!-- Actions Panel -->
+        <div class="card actions-card">
+          <button class="btn btn-primary" id="btn-print" onclick="window.print()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            Cetak / Simpan PDF
+          </button>
+          
+          <button class="btn btn-outline" id="btn-reset" onclick="resetForm()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3-3 3 3m-3-3v12" />
+            </svg>
+            Reset Form
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- PRINT SIGN-OFF (Hidden on screen) -->
+    <div class="print-only print-sign-off">
+      <div class="signature-box">
+        <span class="sig-date" id="print-date">Surabaya, 25 Mei 2026</span>
+        <span>Assessor PSDM HMTP,</span>
+        <div class="sig-line"></div>
+        <span style="font-size: 9pt; font-weight: 500;">( Nama Assessor & Tanda Tangan )</span>
+      </div>
+      <div class="signature-box">
+        <span>Mengetahui,</span>
+        <span>Ketua Departemen PSDM,</span>
+        <div class="sig-line"></div>
+        <span style="font-size: 9pt; font-weight: 500;">( Fungsionaris PSDM )</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ----------------------------------------------------
+       11. INTERACTIVE JAVASCRIPT LOGIC
+       ---------------------------------------------------- -->
+  <script>
+    // Global references for HTML inline handlers
+    let calculateResult;
+    let resetForm;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Elements
+      const sliders = [
+        document.getElementById('c1'),
+        document.getElementById('c2'),
+        document.getElementById('c3'),
+        document.getElementById('c4'),
+        document.getElementById('c5')
+      ];
+
+      const badges = [
+        document.getElementById('val-badge-c1'),
+        document.getElementById('val-badge-c2'),
+        document.getElementById('val-badge-c3'),
+        document.getElementById('val-badge-c4'),
+        document.getElementById('val-badge-c5')
+      ];
+
+      const scoreDisplay = document.getElementById('total-score-display');
+      const scorePrintDisplay = document.getElementById('print-score-text');
+      const circleFill = document.getElementById('score-circle-fill');
+      const statusBadge = document.getElementById('status-badge');
+      const statusText = document.getElementById('status-text');
+      const tipsText = document.getElementById('tips-text');
+      const resultScoreCard = document.getElementById('result-score-card');
+      const printDateEl = document.getElementById('print-date');
+      
+      const iconRec = document.getElementById('badge-icon-rec');
+      const iconConsider = document.getElementById('badge-icon-consider');
+      const iconReject = document.getElementById('badge-icon-reject');
+
+      const candidateNameInput = document.getElementById('candidate-name');
+      const candidateNrpInput = document.getElementById('candidate-nrp');
+      const candidateClassInput = document.getElementById('candidate-class');
+
+      // Update Slider active track backgrounds dynamically (cross-browser fill effect)
+      function updateSliderTrack(slider) {
+        const min = slider.min || 1;
+        const max = slider.max || 100;
+        const val = slider.value;
+        const percentage = ((val - min) / (max - min)) * 100;
+        
+        slider.style.background = `linear-gradient(to right, var(--current-status-color) 0%, var(--current-status-color) ${percentage}%, var(--neutral-200) ${percentage}%, var(--neutral-200) 100%)`;
+      }
+
+      // Main calculation and UI updates
+      calculateResult = function() {
+        let sum = 0;
+        
+        sliders.forEach((slider, idx) => {
+          const val = parseInt(slider.value, 10);
+          badges[idx].textContent = val;
+          sum += val;
+        });
+
+        const average = sum / sliders.length;
+        const formattedScore = average.toFixed(1);
+        
+        // Update Score Text Displays
+        scoreDisplay.textContent = formattedScore;
+        scorePrintDisplay.textContent = average.toFixed(2);
+
+        // Update Circular Gauge Offset (circumference = 502.65)
+        const circumference = 502.65;
+        const offset = circumference - (average / 100) * circumference;
+        circleFill.style.strokeDashoffset = offset;
+
+        // Dynamic status logic
+        let stateColor, stateLight, stateRGB, stateLabel, tipsContent, activeIcon;
+
+        if (average >= 80) {
+          stateColor = 'var(--success)';
+          stateLight = 'var(--success-light)';
+          stateRGB = 'var(--success-rgb)';
+          stateLabel = 'DIREKOMENDASIKAN';
+          tipsContent = 'Kandidat memiliki kualitas CV unggul, etika profesi matang, serta kesiapan dan performa simulasi yang meyakinkan. Sangat direkomendasikan.';
+          activeIcon = iconRec;
+        } else if (average >= 60) {
+          stateColor = 'var(--warning)';
+          stateLight = 'var(--warning-light)';
+          stateRGB = 'var(--warning-rgb)';
+          stateLabel = 'DIPERTIMBANGKAN';
+          tipsContent = 'Kandidat memiliki kompetensi dasar yang cukup, namun masih memerlukan pembimbingan atau perbaikan minor di beberapa bagian kriteria.';
+          activeIcon = iconConsider;
+        } else {
+          stateColor = 'var(--danger)';
+          stateLight = 'var(--danger-light)';
+          stateRGB = 'var(--danger-rgb)';
+          stateLabel = 'TIDAK DIREKOMENDASIKAN';
+          tipsContent = 'Nilai rata-rata berada di bawah ambang minimal evaluasi. Kandidat membutuhkan pelatihan terstruktur lebih lanjut sebelum dinilai layak.';
+          activeIcon = iconReject;
+        }
+
+        // Apply updated color tokens to document elements
+        document.documentElement.style.setProperty('--current-status-color', stateColor);
+        document.documentElement.style.setProperty('--current-status-bg', stateLight);
+        document.documentElement.style.setProperty('--current-status-rgb', stateRGB);
+
+        // Update tracks to match status colors
+        sliders.forEach(slider => {
+          updateSliderTrack(slider);
+        });
+
+        // Hide all icons first, then display the active one
+        [iconRec, iconConsider, iconReject].forEach(icon => {
+          icon.style.display = 'none';
+        });
+        
+        if (activeIcon) {
+          activeIcon.style.display = 'inline-block';
+        }
+
+        statusText.textContent = stateLabel;
+        tipsText.textContent = tipsContent;
+      }
+
+      // Reset form controls
+      resetForm = function() {
+        candidateNameInput.value = '';
+        candidateNrpInput.value = '';
+        candidateClassInput.value = '';
+
+        sliders.forEach(slider => {
+          slider.value = 50;
+        });
+
+        calculateResult();
+      }
+
+      // Format current date in Indonesian format for printable signatures
+      function setIndonesianDate() {
+        const months = [
+          'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+          'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+        
+        const now = new Date();
+        const date = now.getDate();
+        const month = months[now.getMonth()];
+        const year = now.getFullYear();
+
+        printDateEl.textContent = `Surabaya, ${date} ${month} ${year}`;
+      }
+
+      // Set print date handler
+      window.addEventListener('beforeprint', setIndonesianDate);
+
+      // Event Listeners for backup responsiveness (handles keyboard slider inputs too)
+      sliders.forEach(slider => {
+        slider.addEventListener('input', calculateResult);
+      });
+
+      // Initialization
+      calculateResult();
+    });
+  </script>
+</body>
+</html>
